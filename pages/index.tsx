@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { Grid } from '@material-ui/core';
+import { motion } from 'framer-motion';
 import type { GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 
@@ -8,6 +9,8 @@ import { Search } from '../components/Search';
 import { getPaginatedCars } from '../lib/getPaginatedCars';
 import type { CarModel } from '../models/Car';
 import { getAsString } from '../utils/getAsString';
+import { getSelectStr } from '../utils/getSelectStr';
+import { pageTransitionAnimation } from '../utils/pageTransitionAnimation';
 
 type HomeProps = {
   initialData: {
@@ -15,32 +18,39 @@ type HomeProps = {
     totalPages: number;
   };
 };
-type NewCars = {
-  data?: {
-    cars: CarModel[];
-    totalPages: number;
-  };
-};
+
 export default function Home({ initialData }: HomeProps) {
   const { query } = useRouter();
 
   const queryParams = {
-    ...(getValueStr(query?.make) && { make: query.make }),
-    ...(getValueStr(query?.model) && { model: query.model }),
-    ...(getValueStr(query?.minPrice) && { minPrice: query.minPrice }),
-    ...(getValueStr(query?.maxPrice) && { maxPrice: query.maxPrice }),
+    ...(getSelectStr(query?.make) && { make: query.make }),
+    ...(getSelectStr(query?.model) && { model: query.model }),
+    ...(getSelectStr(query?.minPrice) && {
+      minPrice: query.minPrice,
+    }),
+    ...(getSelectStr(query?.maxPrice) && {
+      maxPrice: query.maxPrice,
+    }),
   };
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} md={4}>
         <Search />
       </Grid>
       <Grid item xs={12} md={8}>
-        <PageGrid
-          initialData={initialData}
-          queryParams={queryParams}
-          pageNumber={Number(query.page ?? 1)}
-        />
+        <motion.div
+          key={getAsString(query.page)}
+          initial="pageInitial"
+          animate="pageAnimate"
+          variants={pageTransitionAnimation}
+        >
+          <PageGrid
+            initialData={initialData}
+            queryParams={queryParams}
+            pageNumber={Number(query.page ?? 1)}
+          />
+        </motion.div>
         <div style={{ display: 'none' }}>
           <PageGrid
             initialData={initialData}
@@ -58,8 +68,3 @@ export const getStaticProps: GetStaticProps = async () => {
 
   return { props: { initialData: result } };
 };
-
-function getValueStr(value?: string | string[]): string | undefined {
-  const str = getAsString(value);
-  return !str || str.toLowerCase() === 'all' ? undefined : str;
-}

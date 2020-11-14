@@ -1,8 +1,11 @@
 import { Container } from '@material-ui/core';
+import { motion } from 'framer-motion';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import type { Dispatch, SetStateAction, ReactElement } from 'react';
 
 import { NavBar } from '../components/NavBar';
+import { pageTransitionAnimation } from '../utils/pageTransitionAnimation';
 
 type LayoutProps = {
   children: ReactElement;
@@ -16,6 +19,9 @@ export default function Layout({
   setDarkMode,
 }: LayoutProps) {
   const siteTitle = 'Taiwan Cars';
+
+  const router = useRouter();
+
   return (
     <>
       <Head>
@@ -35,7 +41,16 @@ export default function Layout({
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <NavBar darkMode={darkMode} setDarkMode={setDarkMode} />
-      <Container maxWidth="lg">{children}</Container>
+      <Container maxWidth="lg">
+        <motion.div
+          key={router.route}
+          initial="pageInitial"
+          animate="pageAnimate"
+          variants={pageTransitionAnimation}
+        >
+          {children}
+        </motion.div>
+      </Container>
     </>
   );
 }

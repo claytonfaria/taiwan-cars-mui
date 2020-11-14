@@ -3,7 +3,7 @@ import type { ParsedUrlQuery } from 'querystring';
 import type { CarModel } from '../models/Car';
 import Car from '../models/Car';
 import dbConnect from '../utils/dbConnect';
-import { getAsString } from '../utils/getAsString';
+import { getValueNumber } from '../utils/getValueNumber';
 
 export async function getPaginatedCars(query?: ParsedUrlQuery) {
   await dbConnect();
@@ -34,18 +34,4 @@ export async function getPaginatedCars(query?: ParsedUrlQuery) {
     totalPages: Math.ceil(totalRows / rowsPerPage),
     cars: cars?.map(({ _id, ...car }) => car),
   };
-}
-
-function getValueNumber(value?: string | string[]): number | undefined {
-  const str = getValueStr(value);
-  if (str === undefined) {
-    return;
-  }
-  const number = Number.parseInt(str);
-  return Number.isNaN(number) ? undefined : number;
-}
-
-function getValueStr(value?: string | string[]): string | undefined {
-  const str = getAsString(value);
-  return !str || str.toLowerCase() === 'all' ? undefined : str;
 }
